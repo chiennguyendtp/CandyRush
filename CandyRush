@@ -1,23 +1,22 @@
 import random
 
 # The size of the board in tiles
-TILESW = 10 # tile count for width
-TILESH = 14 # tile count for height
+TILESW = 10
+TILESH = 14
 # The pixel size of the screen
-WIDTH = TILESW * 40 #Width size of board
-HEIGHT = TILESH * 40 #Height size of board
+WIDTH = TILESW * 40
+HEIGHT = TILESH * 40
 
 TITLE = 'Candy Crush'
-
-cursor = Actor('selected', topleft=(0,0))# adding cursor
+score = 0
+cursor = Actor('selected', topleft=(0, 0))
 
 board = []
 for row in range(TILESH):
     # Make a list of 10 random tiles
-    tiles = [random.randint(1,8) for _ in range(TILESW)]
+    tiles = [random.randint(1, 8) for _ in range(TILESW)]
     board.append(tiles)
 
-#For Screen
 def draw():
     screen.clear()
     for y in range(TILESH):
@@ -27,73 +26,63 @@ def draw():
                 screen.blit(str(tile), (x * 40, y * 40))
     cursor.draw()
 
+    # Display the score on the screen
+    screen.draw.text("Score: %s" % score, bottomleft=(0, HEIGHT), fontsize=60)
+
 def cursor_tile_pos():
-    return (int(cursor.x // 40)-1, int(cursor.y // 40))
+    return (int(cursor.x // 40) - 1, int(cursor.y // 40))
 
 def on_key_up(key):
     x, y = cursor_tile_pos()
     if key == keys.LEFT and x > 0:
-       cursor.x -= 40
-    if key == keys.RIGHT and x < TILESW-2:
-       cursor.x += 40
+        cursor.x -= 40
+    if key == keys.RIGHT and x < TILESW - 2:
+        cursor.x += 40
     if key == keys.UP and y > 0:
-       cursor.y -= 40
-    if key == keys.DOWN and y < TILESH-1:
-       cursor.y += 40
+        cursor.y -= 40
+    if key == keys.DOWN and y < TILESH - 1:
+        cursor.y += 40
     if key == keys.SPACE:
-       board[y][x], board[y][x+1] = board[y][x+1], board[y][x]
+        board[y][x], board[y][x + 1] = board[y][x + 1], board[y][x]
+    global score
+
 def check_matches():
+    global score
     for y in range(TILESH):
-        for x in range(TILESW-1):
-            if board[y][x] == board[y][x+1]:
+        for x in range(TILESW - 2):
+            if board[y][x] is not None and board[y][x] == board[y][x + 1] == board[y][x + 2]:
+                # Normal matching tiles
                 board[y][x] = None
-                board[y][x+1] = None
+                board[y][x + 1] = None
+                board[y][x + 2] = None
+                score += 50
 
-def every_second():
-    check_matches()
-
-clock.schedule_interval(every_second, 1.0)
 def check_gaps():
     # Work from the bottom up
-    for y in range(TILESH-1,-1,-1):
+    for y in range(TILESH - 1, -1, -1):
         for x in range(TILESW):
             if board[y][x] is None:
-                drop_tiles(x,y)
-def drop_tiles(x,y):
+                drop_tiles(x, y)
+
+def drop_tiles(x, y):
     # Loop backwards through the rows from x,y to the top
-    for row in range(y,0,-1):
+    for row in range(y, 0, -1):
         # Copy the tile above down
-        board[row][x] = board[row-1][x]
+        board[row][x] = board[row - 1][x]
     # Finally blank the tile at the top
     board[0][x] = None
-def every_second():
-    check_matches()
-    check_gaps()
-NEW_TILE_PROB = 0.1 # 10% chance of adding a new tile each time
 
 def add_new_tiles():
     for x in range(TILESW):
         if board[0][x] is None and random.random() < NEW_TILE_PROB:
-            board[0][x] = random.randint(1,8)
-def check_matches():
-    for y in range(TILESH):
-        for x in range(TILESW-2):
-            if board[y][x] == board[y][x+1] == board[y][x+2]:
-                board[y][x] = None
-                board[y][x+1] = None
-                board[y][x+2] = None
-def check_matches():
-    global score
-    for y in range(TILESH):
-        for x in range(TILESW-2):
-            if board[y][x] is not None and board[y][x] == board[y][x+1] == board[y][x+2]:
-                if board[y][x] == 9:
-                    # A bomb, so blank out whole row
-                    for x2 in range(TILESW):
-                        board[y][x2] = None
-                else:
-                    board[y][x] = None
-                    board[y][x+1] = None
-                    board[y][x+2] = None
+            board[0][x] = random.randint(1, 8)
 
-                score += 50
+score = 0
+NEW_TILE_PROB = 0.1  # 10% chance of adding a new tile each time
+
+def every_second():
+    check_matches()
+    check_gaps()
+    add_new_tiles()
+
+clock.schedule_interval(every_second, 1.0)
