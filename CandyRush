@@ -1,4 +1,5 @@
 import random
+import pygame
 
 # The size of the board in tiles
 TILESW = 10
@@ -14,7 +15,7 @@ cursor = Actor('selected', topleft=(0, 0))
 board = []
 for row in range(TILESH):
     # Make a list of 10 random tiles
-    tiles = [random.randint(1, 8) for _ in range(TILESW)]
+    tiles = [random.randint(1, 9) for _ in range(TILESW)]
     board.append(tiles)
 
 def draw():
@@ -22,7 +23,10 @@ def draw():
     for y in range(TILESH):
         for x in range(TILESW):
             tile = board[y][x]
-            if tile:
+            if tile == 9: #if it's a trash tile
+                trash_image = pygame.image.load('9.png')
+                screen.blit(trash_image, (x * 40, y * 40))
+            elif tile:
                 screen.blit(str(tile), (x * 40, y * 40))
     cursor.draw()
 
@@ -50,12 +54,19 @@ def check_matches():
     global score
     for y in range(TILESH):
         for x in range(TILESW - 2):
-            if board[y][x] is not None and board[y][x] == board[y][x + 1] == board[y][x + 2]:
+            if board[y][x] == 9 and board[y][x + 1] == 9 and board[y][x + 2] == 9:
+                # Trash tile matching
+                board[y][x] = None
+                board[y][x + 1] = None
+                board[y][x + 2] = None
+                score += 100
+            elif board[y][x] is not None and board[y][x] == board[y][x + 1] == board[y][x + 2]:
                 # Normal matching tiles
                 board[y][x] = None
                 board[y][x + 1] = None
                 board[y][x + 2] = None
                 score += 50
+
 
 def check_gaps():
     # Work from the bottom up
@@ -75,7 +86,7 @@ def drop_tiles(x, y):
 def add_new_tiles():
     for x in range(TILESW):
         if board[0][x] is None and random.random() < NEW_TILE_PROB:
-            board[0][x] = random.randint(1, 8)
+            board[0][x] = random.randint(1, 9)
 
 score = 0
 NEW_TILE_PROB = 0.1  # 10% chance of adding a new tile each time
@@ -85,4 +96,4 @@ def every_second():
     check_gaps()
     add_new_tiles()
 
-clock.schedule_interval(every_second, 1.0)
+clock.schedule_interval(every_second, 0.5)
