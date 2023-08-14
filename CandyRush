@@ -2,8 +2,8 @@ import random
 import pygame
 
 # The size of the board in tiles
-TILESW = 10
-TILESH = 14
+TILESW = 14
+TILESH = 10
 # The pixel size of the screen
 WIDTH = TILESW * 40
 HEIGHT = TILESH * 40
@@ -15,7 +15,7 @@ cursor = Actor('selected', topleft=(0, 0))
 board = []
 for row in range(TILESH):
     # Make a list of 10 random tiles
-    tiles = [random.randint(1, 9) for _ in range(TILESW)]
+    tiles = [random.randint(1, 11) for _ in range(TILESW)]
     board.append(tiles)
 
 def draw():
