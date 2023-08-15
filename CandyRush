@@ -55,26 +55,37 @@ def check_matches():
     for y in range(TILESH):
         for x in range(TILESW - 2):
             if board[y][x] == 9 and board[y][x + 1] == 9 and board[y][x + 2] == 9:
-                # Trash tile matching
+                # Trash tile matching for plastic bottle
+                board[y][x] = None
+                board[y][x + 1] = None
+                board[y][x + 2] = None
+                score += 75
+            if board[y][x] == 10 and board[y][x + 1] == 10 and board[y][x + 2] == 10:
+                # Trash tile matching for plastic bag
                 board[y][x] = None
                 board[y][x + 1] = None
                 board[y][x + 2] = None
                 score += 100
+            if board[y][x] == 11 and board[y][x + 1] == 11 and board[y][x + 2] == 11:
+                # Trash tile matching for plastic can
+                board[y][x] = None
+                board[y][x + 1] = None
+                board[y][x + 2] = None
+                score += 50
             elif board[y][x] is not None and board[y][x] == board[y][x + 1] == board[y][x + 2]:
                 # Normal matching tiles
                 board[y][x] = None
                 board[y][x + 1] = None
                 board[y][x + 2] = None
-                score += 50
-
-
+                score += 20
+#Develop check gap for the game after match 3 tiles
 def check_gaps():
     # Work from the bottom up
     for y in range(TILESH - 1, -1, -1):
         for x in range(TILESW):
             if board[y][x] is None:
                 drop_tiles(x, y)
-
+#Develop drop the tile function after have gap
 def drop_tiles(x, y):
     # Loop backwards through the rows from x,y to the top
     for row in range(y, 0, -1):
